@@ -1,8 +1,8 @@
-"""Initialize DB models
+"""initialize Basic tables
 
-Revision ID: 4a3267a7043c
+Revision ID: 7a69c42b6603
 Revises: 
-Create Date: 2020-08-24 04:38:45.903123
+Create Date: 2020-08-24 07:16:22.729938
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4a3267a7043c'
+revision = '7a69c42b6603'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -31,13 +31,13 @@ def upgrade():
     )
     op.create_table('Venue',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=True),
-    sa.Column('city', sa.String(length=120), nullable=True),
-    sa.Column('state', sa.String(length=120), nullable=True),
-    sa.Column('address', sa.String(length=120), nullable=True),
-    sa.Column('phone', sa.String(length=120), nullable=True),
-    sa.Column('image_link', sa.String(length=500), nullable=True),
-    sa.Column('facebook_link', sa.String(length=120), nullable=True),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('city', sa.String(length=120), nullable=False),
+    sa.Column('state', sa.String(length=120), nullable=False),
+    sa.Column('address', sa.String(length=120), nullable=False),
+    sa.Column('phone', sa.String(length=120), nullable=False),
+    sa.Column('image_link', sa.String(length=500), nullable=False),
+    sa.Column('facebook_link', sa.String(length=120), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

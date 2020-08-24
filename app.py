@@ -34,13 +34,17 @@ class Venue(db.Model):
     __tablename__ = 'Venue'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
+    name = db.Column(db.String, nullable=False)
+    city = db.Column(db.String(120), nullable=False)
+    state = db.Column(db.String(120), nullable=False)
+    address = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(120), nullable=False)
+    image_link = db.Column(db.String(500), nullable=False)
+    facebook_link = db.Column(db.String(120), nullable=False)
+    website = db.Column(db.String(120), nullable=False)
+    seeking_talent = db.Column(db.Boolean(), nullable=True)
+    seeking_description = db.Column(db.Text(), nullable=True)
+    genres = db.Column(db.ARRAY(db.String), nullable=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -66,13 +70,16 @@ class Artist(db.Model):
 
 def format_datetime(value, format='medium'):
   date = dateutil.parser.parse(value)
+  print(date.year)
+  print(date.day)
+  print(date.month)
   if format == 'full':
       format="EEEE MMMM, d, y 'at' h:mma"
   elif format == 'medium':
       format="EE MM, dd, y h:mma"
-  return babel.dates.format_datetime(date, format)
+  return babel.dates.format_date(date, format)
 
-app.jinja_env.filters['datetime'] = format_datetime
+# app.jinja_env.filters['datetime'] = format_datetime
 
 #----------------------------------------------------------------------------#
 # Controllers.
@@ -90,28 +97,29 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
-  data=[{
-    "city": "San Francisco",
-    "state": "CA",
-    "venues": [{
-      "id": 1,
-      "name": "The Musical Hop",
-      "num_upcoming_shows": 0,
-    }, {
-      "id": 3,
-      "name": "Park Square Live Music & Coffee",
-      "num_upcoming_shows": 1,
-    }]
-  }, {
-    "city": "New York",
-    "state": "NY",
-    "venues": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }]
-  return render_template('pages/venues.html', areas=data);
+  data = []
+  query_set = Venue.query.order_by(Venue.city, Venue.state).all()
+  ref_city = None
+  ref_state = None
+  for venue in query_set:
+    if venue.state == ref_state and venue.city == ref_city:
+      data[-1]["venues"].append({
+        "id": venue.id,
+        "name": venue.name
+      })
+    else:
+      data.append({
+        "city": venue.city,
+        "state": venue.state,
+        "venues": [{
+          "id": venue.id,
+          "name": venue.name
+        }]
+      })
+      ref_city = venue.city
+      ref_state = venue.state
+    print(data)
+  return render_template('pages/venues.html', areas=data)
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
