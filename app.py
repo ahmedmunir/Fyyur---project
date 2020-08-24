@@ -57,6 +57,9 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
+
+  # Query data by city & state, and make reference of city & state so we can append data that has
+  # The same city & state together
   data = []
   query_set = Venue.query.order_by(Venue.city, Venue.state).all()
   ref_city = None
