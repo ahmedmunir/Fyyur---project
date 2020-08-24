@@ -5,7 +5,7 @@
 import json
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for
+from flask import Flask, render_template, request, Response, flash, redirect, url_for, jsonify
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 import logging
@@ -39,12 +39,12 @@ class Venue(db.Model):
     state = db.Column(db.String(120), nullable=False)
     address = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120), nullable=False)
-    image_link = db.Column(db.String(500), nullable=False)
+    image_link = db.Column(db.String(500), nullable=True)
     facebook_link = db.Column(db.String(120), nullable=False)
-    website = db.Column(db.String(120), nullable=False)
+    website = db.Column(db.String(120), nullable=True)
     seeking_talent = db.Column(db.Boolean(), nullable=True)
     seeking_description = db.Column(db.Text(), nullable=True)
-    genres = db.Column(db.ARRAY(db.String), nullable=True)
+    genres = db.Column(db.ARRAY(db.String), nullable=False)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -119,12 +119,15 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
+  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+  # seach for Hop should return "The Musical Hop".
+  # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
   response = {}
   response["count"] = 0
   response['data'] = []
   q = request.form.get('search_term')
   query_set = Venue.query.\
-              filter(Venue.name.like(f'{q}%') | Venue.name.like(f'%{q}') | Venue.name.like(f'%{q}%')).all()
+              filter(Venue.name.ilike(f'{q}%') | Venue.name.ilike(f'%{q}') | Venue.name.ilike(f'%{q}%')).all()
 
   for result in query_set:
     response['data'].append({
@@ -153,22 +156,51 @@ def create_venue_form():
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
-
   # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+  try:
+    name = request.form['name']
+    city = request.form['city']
+    state = request.form['state']
+    address = request.form['address']
+    phone = request.form['phone']
+    genres = request.form.getlist('genres')
+    fb_link = request.form['facebook_link']
+
+    new_venue = Venue(name=name, city=city, state=state, address=address, phone=phone, genres=genres, facebook_link=fb_link)
+    db.session.add(new_venue)
+    db.session.commit()
+    flash('Venue ' + new_venue.name + ' was successfully listed!')
+  except:
+    db.session.rollback()
+    flash('An error occurred. Venue ' + new_venue.name + ' could not be listed.')
+  finally:
+    db.session.close()
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
   # TODO: Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
-
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
-  return None
+  error = False
+  try:
+    venue_to_delete = Venue.query.get(venue_id)
+    db.session.delete(venue_to_delete)
+    db.session.commit()
+    flash('Venue was successfully Deleted!')
+  except:
+    db.session.rollback()
+    flash('Something went wrong!')
+    error = True
+  finally:
+    db.session.close()
+  if(error):
+    return jsonify({"message": "Failed"})
+  return jsonify({"message": "Succeed"})
 
 #  Artists
 #  ----------------------------------------------------------------
