@@ -13,6 +13,7 @@ from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
 import datetime
+import sys
 
 from flask_migrate import Migrate
 #----------------------------------------------------------------------------#
@@ -156,7 +157,46 @@ def show_venue(venue_id):
   # TODO: replace with real venue data from the venues table, using venue_id
   try:
     data = Venue.query.get(venue_id)
+    shows = Venue.query.get(venue_id).shows
+    past_shows = [show for show in shows if show.start_time < datetime.datetime.today()]
+    upcoming_shows = [show for show in shows if show.start_time >= datetime.datetime.today()]
+    past_shows = [
+      {
+        "artist_id": show.artist_id,
+        "artist_name": show.artist.name,
+        "artist_image_link": show.artist.image_link,
+        "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')
+      } 
+    for show in past_shows]
+
+    upcoming_shows = [
+      {
+        "artist_id": show.artist_id,
+        "artist_name": show.artist.name,
+        "artist_image_link": show.artist.image_link,
+        "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')
+      } 
+    for show in upcoming_shows]
+    
+    data = {
+      "id": data.id,
+      "name": data.name,
+      "genres": data.genres,
+      "address": data.address,
+      "city": data.city,
+      "state": data.state,
+      "phone": data.phone,
+      "website": data.website,
+      "facebook_link": data.facebook_link,
+      "seeking_talent": data.seeking_talent,
+      "seeking_description": data.seeking_description,
+      "past_shows": past_shows,
+      "upcoming_shows": upcoming_shows,
+      "past_shows_count": len(past_shows),
+      "upcoming_shows_count": len(upcoming_shows)
+    }    
   except:
+    print(sys.exc_info())
     return render_template('errors/500.html'), 500
   if not data:
     return render_template('errors/404.html'), 404
@@ -255,7 +295,45 @@ def show_artist(artist_id):
   # TODO: replace with real venue data from the venues table, using venue_id
   try:
     data = Artist.query.get(artist_id)
+    shows = Artist.query.get(artist_id).shows
+    past_shows = [show for show in shows if show.start_time < datetime.datetime.today()]
+    upcoming_shows = [show for show in shows if show.start_time >= datetime.datetime.today()]
+    past_shows = [
+      {
+        "venue_id": show.venue_id,
+        "venue_name": show.venue.name,
+        "venue_image_link": show.venue.image_link,
+        "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')
+      } 
+    for show in past_shows]
+
+    upcoming_shows = [
+      {
+        "venue_id": show.venue_id,
+        "venue_name": show.venue.name,
+        "venue_image_link": show.venue.image_link,
+        "venue_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')
+      } 
+    for show in upcoming_shows]
+    
+    data = {
+      "id": data.id,
+      "name": data.name,
+      "genres": data.genres,
+      "city": data.city,
+      "state": data.state,
+      "phone": data.phone,
+      "website": data.website,
+      "facebook_link": data.facebook_link,
+      "seeking_venue": data.seeking_venue,
+      "seeking_description": data.seeking_description,
+      "past_shows": past_shows,
+      "upcoming_shows": upcoming_shows,
+      "past_shows_count": len(past_shows),
+      "upcoming_shows_count": len(upcoming_shows)
+    } 
   except:
+    print(sys.exc_info())
     return render_template('errors/500.html'), 500
   if not data:
     return render_template('errors/404.html'), 404
