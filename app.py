@@ -12,6 +12,7 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+import datetime
 
 from flask_migrate import Migrate
 #----------------------------------------------------------------------------#
@@ -46,7 +47,7 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean(), nullable=True)
     seeking_description = db.Column(db.Text(), nullable=True)
     
-
+    shows = db.relationship('Show', backref='venue', lazy=True)
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 class Artist(db.Model):
@@ -64,9 +65,17 @@ class Artist(db.Model):
     seeking_venue = db.Column(db.Boolean(), nullable=True)
     seeking_description = db.Column(db.Text(), nullable=True)
 
+    shows = db.relationship('Show', backref='artist', lazy=True)
+
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+class Show(db.Model):
+    __tablename__ = 'Show'
+    id = db.Column(db.Integer, primary_key=True)
+    start_time = db.Column(db.DateTime(), nullable=False, default=datetime.datetime.utcnow)
+    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
+    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
 
 #----------------------------------------------------------------------------#
 # Filters.
