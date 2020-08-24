@@ -145,7 +145,12 @@ def search_venues():
 def show_venue(venue_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
-  data = Venue.query.get(venue_id)
+  try:
+    data = Venue.query.get(venue_id)
+  except:
+    return render_template('errors/500.html'), 500
+  if not data:
+    return render_template('errors/404.html'), 404
   return render_template('pages/show_venue.html', venue=data)
 
 #  Create Venue
@@ -239,7 +244,12 @@ def search_artists():
 def show_artist(artist_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
-  data = Artist.query.get(artist_id)
+  try:
+    data = Artist.query.get(artist_id)
+  except:
+    return render_template('errors/500.html'), 500
+  if not data:
+    return render_template('errors/404.html'), 404
   return render_template('pages/show_artist.html', artist=data)
 
 #  Update
@@ -247,7 +257,12 @@ def show_artist(artist_id):
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
   # TODO: populate form with fields from artist with ID <artist_id>
-  artist = Artist.query.get(artist_id)
+  try:
+    artist = Artist.query.get(artist_id)
+  except:
+    return render_template('errors/500.html'), 500
+  if not artist:
+    return render_template('errors/404.html'), 404
   form = ArtistForm(obj=artist)
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
@@ -255,7 +270,12 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
-  edit_artist = Artist.query.get(artist_id)
+  try:
+    edit_artist = Artist.query.get(artist_id)
+  except:
+    return render_template('errors/500.html'), 500
+  if not edit_artist:
+    return render_template('errors/404.html'), 404
   form = ArtistForm(obj=edit_artist)
   if form.validate_on_submit():
     edit_artist.name = form.name.data
@@ -273,7 +293,12 @@ def edit_artist_submission(artist_id):
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
   # TODO: populate form with values from venue with ID <venue_id>
-  venue = Venue.query.get(venue_id)
+  try:
+    venue = Venue.query.get(venue_id)
+  except:
+    return render_template('errors/500.html'), 500
+  if not venue:
+    return render_template('errors/404.html'), 404
   form = VenueForm(obj=venue)
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
@@ -281,7 +306,12 @@ def edit_venue(venue_id):
 def edit_venue_submission(venue_id):
   # TODO: take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
-  edit_venue = Venue.query.get(venue_id)
+  try:
+    edit_venue = Venue.query.get(venue_id)
+  except:
+    return render_template('errors/500.html'), 500
+  if not edit_venue:
+    return render_template('errors/404.html'), 404
   form = VenueForm(obj=edit_venue)
   if form.validate_on_submit():
     edit_venue.name = form.name.data
